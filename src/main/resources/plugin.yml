@@ -1,0 +1,14 @@
+name: SimpleChestShopGUI
+version: '${version}'
+main: com.gmail.necnionch.myplugin.simplechestshopgui.bukkit.SChestShopGUIPlugin
+api-version: 1.14
+depend: [ ChestShop ]
+authors: [ Necnion8 ]
+
+description: |-
+  ChestShopの作成を簡単にするシンプルなGUIプラグイン
+  まずは看板に new shop と書いてみよう。
+
+permissions:
+  simplechestshopgui.use:
+    default: true
