@@ -7,8 +7,11 @@ authors: [ Necnion8 ]
 
 description: |-
   ChestShopの作成を簡単にするシンプルなGUIプラグイン
-  まずは看板に new shop と書いてみよう。
+  まずは看板に new shop と書いてみよう
 
 permissions:
   simplechestshopgui.use:
     default: true
+
+  simplechestshopgui.access-other:
+    default: op
