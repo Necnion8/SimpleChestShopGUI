@@ -1,6 +1,7 @@
 package com.gmail.necnionch.myplugin.simplechestshopgui.bukkit.shop;
 
 import com.Acrobot.Breeze.Utils.PriceUtil;
+import com.Acrobot.ChestShop.Configuration.Properties;
 import com.gmail.necnionch.myplugin.simplechestshopgui.bukkit.SChestShopGUIPlugin;
 import com.google.common.collect.Maps;
 import org.bukkit.Bukkit;
@@ -160,7 +161,7 @@ public class ShopSetting {
 
         // format lines
         String[] lines = new String[4];
-        lines[0] = shopOwner.getName();
+        lines[0] = (adminShop ? Properties.ADMIN_SHOP_NAME : shopOwner.getName());
         lines[1] = "" + Math.min(1, amount);
 
         // price
@@ -189,15 +190,24 @@ public class ShopSetting {
         data.remove(new NamespacedKey(plugin, "pricebuy"));
         data.remove(new NamespacedKey(plugin, "pricesell"));
         data.remove(new NamespacedKey(plugin, "admin"));
-        for (int i = 0; i < 4; i++) {
-            sign.setLine(i, "");
-        }
-        sign.update(true);
 
         // event
         SignChangeEvent event = new SignChangeEvent(sign.getBlock(), shopOwner, lines);
         Bukkit.getServer().getPluginManager().callEvent(event);
-        return !event.isCancelled();
+
+        if (event.isCancelled()) {
+            for (int i = 0; i < 4; i++) {
+                sign.setLine(i, "");
+            }
+            sign.update(false);
+            return false;
+        }
+
+        for (int i = 0; i < 4; i++) {
+            sign.setLine(i, lines[i]);
+        }
+        sign.update(false);
+        return true;
     }
 
     private static String formatPriceText(Integer price) {

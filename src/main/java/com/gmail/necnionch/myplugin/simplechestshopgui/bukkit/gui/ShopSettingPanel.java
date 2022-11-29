@@ -206,7 +206,7 @@ public class ShopSettingPanel extends Panel {
     private PanelItem createImportPreviousButton() {
         return getPreviousSetting().map(prev -> {
             String itemLabel = Optional.ofNullable(prev.getItemId())
-                    .map(itemId -> ChatColor.GOLD + itemId + ChatColor.WHITE + " [x" + prev.getAmount() + "]")
+                    .map(itemId -> ChatColor.GOLD + itemId)
                     .orElse("");
 
             List<String> lines = createSettingPreview(prev, false, false, false);
@@ -382,10 +382,7 @@ public class ShopSettingPanel extends Panel {
 
         setting.setItemId(itemId);
         setting.setPrevious();
-        if (!setting.createChestShop(player, sign)) {
-//            player.sendMessage(ChatColor.RED + "ショップを作成できませんでした");
-            sign.getBlock().breakNaturally();
-        }
+        setting.createChestShop(player, sign);
     }
 
 }
