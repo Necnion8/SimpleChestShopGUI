@@ -1,5 +1,6 @@
 package com.gmail.necnionch.myplugin.simplechestshopgui.bukkit.gui;
 
+import com.Acrobot.Breeze.Utils.MaterialUtil;
 import com.Acrobot.ChestShop.Permission;
 import com.gmail.necnionch.myplugin.simplechestshopgui.bukkit.SChestShopGUIPlugin;
 import com.gmail.necnionch.myplugin.simplechestshopgui.bukkit.shop.ShopSetting;
@@ -21,7 +22,6 @@ public class ShopSettingPanel extends Panel {
     private final ShopSetting setting;
     private final Player player;
     private Sign sign;
-    private boolean changed;
 
     public ShopSettingPanel(Player player, ShopSetting setting) {
         super(player, 54, ChatColor.DARK_AQUA + "ショップ編集", new ItemStack(Material.AIR));
@@ -67,6 +67,7 @@ public class ShopSettingPanel extends Panel {
     public PanelItem[] build() {
         PanelItem[] slots = new PanelItem[getSize()];
 
+        // switch: admin shop
         if (isAllowAdminShop()) {
             slots[0] = PanelItem.createItem(Material.AIR, "").setItemBuilder((p) -> {
                 String name;
@@ -90,6 +91,7 @@ public class ShopSettingPanel extends Panel {
             saveToSign();
         }
 
+        // switch: override owner
         if (isAllowOverrideOwner() && !player.getUniqueId().equals(setting.getOwnerId())) {
             List<String> lines = Lists.newArrayList(ChatColor.GRAY + "現在の作成者: " + ChatColor.WHITE + getOwnerName().orElse(setting.getOwnerId().toString()));
             slots[1] = PanelItem.createItem(Material.ANVIL, ChatColor.DARK_AQUA + "作成者を上書き", lines).setClickListener((e, p) -> {
@@ -101,6 +103,7 @@ public class ShopSettingPanel extends Panel {
             });
         }
 
+        // import: previous
         getPreviousSetting().ifPresent(prev -> {
             String itemLabel = Optional.ofNullable(prev.getItemId())
                     .map(itemId -> ChatColor.GOLD + itemId + ChatColor.WHITE + "[x" + prev.getAmount() + "]")
@@ -131,8 +134,16 @@ public class ShopSettingPanel extends Panel {
         slots[9*2+2] = null;  // sell price
         slots[9*2+6] = null;  // buy price
 
-        slots[9*4+4] = PanelItem.createItem(Material.VILLAGER_SPAWN_EGG, ChatColor.GOLD + "ショップを作成する！").setClickListener((e, p) -> {
-            if (ClickType.LEFT.equals(e.getClick())) {
+        slots[9*4+4] = PanelItem.createItem(Material.AIR, "").setItemBuilder((p) -> {
+            String name = ChatColor.DARK_RED + "アイテムが設定されていません";
+            if (setting.getItemId() != null && MaterialUtil.getItem(setting.getItemId()) != null) {
+                name = ChatColor.GOLD + "ショップを作成する！";
+            }
+            return PanelItem.createItem(Material.VILLAGER_SPAWN_EGG, name).getItemStack();
+
+        }).setClickListener((e, p) -> {
+            if (ClickType.LEFT.equals(e.getClick()) && setting.getItemId() != null && MaterialUtil.getItem(setting.getItemId()) != null) {
+                setting.setPrevious();
                 saveToSign();
             }
         });

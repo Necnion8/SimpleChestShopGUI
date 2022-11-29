@@ -18,10 +18,12 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 public final class SChestShopGUIPlugin extends JavaPlugin implements Listener {
     public static final String USE_PERM = "simplechestshopgui.use";
     public static final String OTHER_ACCESS_PERM = "simplechestshopgui.access-other";
+    public static final Function<String, Boolean> SIGN_NEW_SHOP = (line) -> line.equalsIgnoreCase("new shop") || line.equalsIgnoreCase("newshop") || line.equalsIgnoreCase("shopnew");
 
     @Override
     public void onEnable() {
@@ -39,7 +41,8 @@ public final class SChestShopGUIPlugin extends JavaPlugin implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         // remove previous cache
-        ShopSetting.getPlayerPrevious(event.getPlayer().getUniqueId()).ifPresent(ShopSetting::removePrevious);
+        ShopSetting.getPlayerPrevious(event.getPlayer().getUniqueId())
+                .ifPresent(ShopSetting::removePrevious);
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -48,18 +51,15 @@ public final class SChestShopGUIPlugin extends JavaPlugin implements Listener {
             return;
 
         for (String line : event.getLines()) {
-            if (line.equalsIgnoreCase("new shop") || line.equalsIgnoreCase("newshop") || line.equalsIgnoreCase("shopnew")) {
+            if (SIGN_NEW_SHOP.apply(line)) {
                 event.setCancelled(true);
 
                 ShopSetting draft = ShopSetting.createEmpty(event.getPlayer().getUniqueId());
                 Sign sign = (Sign) event.getBlock().getState();
-//                sign.setLine(0, "ショップ作成中");
-//                sign.setLine(1, "by");
-//                sign.setLine(2, event.getPlayer().getName());
-//                draft.saveToSign(sign);
 
-                new ShopSettingPanel(event.getPlayer(), draft).withSign(sign).open();
-
+                new ShopSettingPanel(event.getPlayer(), draft)
+                        .withSign(sign)
+                        .open();
                 return;
             }
         }
@@ -95,7 +95,9 @@ public final class SChestShopGUIPlugin extends JavaPlugin implements Listener {
                 return;
             }
         }
-        new ShopSettingPanel(event.getPlayer(), setting).withSign(sign).open();
+        new ShopSettingPanel(event.getPlayer(), setting)
+                .withSign(sign)
+                .open();
 
     }
 
