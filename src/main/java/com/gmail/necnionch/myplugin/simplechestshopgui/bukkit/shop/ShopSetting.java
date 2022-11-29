@@ -1,9 +1,13 @@
 package com.gmail.necnionch.myplugin.simplechestshopgui.bukkit.shop;
 
+import com.Acrobot.Breeze.Utils.PriceUtil;
 import com.gmail.necnionch.myplugin.simplechestshopgui.bukkit.SChestShopGUIPlugin;
 import com.google.common.collect.Maps;
+import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Sign;
+import org.bukkit.entity.Player;
+import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -35,7 +39,7 @@ public class ShopSetting {
     }
 
     public static ShopSetting createEmpty(UUID ownerId) {
-        return new ShopSetting(ownerId, null, 1, null, null, false);
+        return new ShopSetting(ownerId, null, 1, 100, null, false);
     }
 
 
@@ -148,6 +152,62 @@ public class ShopSetting {
         boolean adminShop = data.getOrDefault(new NamespacedKey(plugin, "admin"), PersistentDataType.INTEGER, 0) >= 1;
 
         return new ShopSetting(owner, itemId, amount, priceBuy, priceSell, adminShop);
+    }
+
+    public boolean createChestShop(Player shopOwner, Sign sign) {
+        if (itemId == null || !sign.isPlaced())
+            return false;
+
+        // format lines
+        String[] lines = new String[4];
+        lines[0] = shopOwner.getName();
+        lines[1] = "" + Math.min(1, amount);
+
+        // price
+        StringBuilder price = new StringBuilder();
+        Integer sellValue = priceSell == null || priceSell < 0 ? null : priceSell;
+        Integer buyValue = priceBuy == null || priceBuy < 0 ? null : priceBuy;
+
+        if (buyValue != null) {
+            price.append("B ").append(formatPriceText(buyValue));
+            if (sellValue != null) {
+                price.append(" : ").append(formatPriceText(sellValue)).append(" S");
+            }
+        } else if (sellValue != null) {
+            price.append("S ").append(formatPriceText(sellValue));
+        }
+
+        lines[2] = price.toString();
+        lines[3] = itemId;
+
+        // clear setting
+        PersistentDataContainer data = sign.getPersistentDataContainer();
+        SChestShopGUIPlugin plugin = JavaPlugin.getPlugin(SChestShopGUIPlugin.class);
+        data.remove(new NamespacedKey(plugin, "owner"));
+        data.remove(new NamespacedKey(plugin, "item"));
+        data.remove(new NamespacedKey(plugin, "amount"));
+        data.remove(new NamespacedKey(plugin, "pricebuy"));
+        data.remove(new NamespacedKey(plugin, "pricesell"));
+        data.remove(new NamespacedKey(plugin, "admin"));
+        for (int i = 0; i < 4; i++) {
+            sign.setLine(i, "");
+        }
+        sign.update(true);
+
+        // event
+        SignChangeEvent event = new SignChangeEvent(sign.getBlock(), shopOwner, lines);
+        Bukkit.getServer().getPluginManager().callEvent(event);
+        return !event.isCancelled();
+    }
+
+    private static String formatPriceText(Integer price) {
+        if (price == 0)
+            return PriceUtil.FREE_TEXT;
+
+        String tmp = String.valueOf(Math.round(price * 100) / 100d);
+        if (tmp.endsWith(".0"))
+            tmp = tmp.substring(0, tmp.length() - 2);
+        return tmp;
     }
 
 

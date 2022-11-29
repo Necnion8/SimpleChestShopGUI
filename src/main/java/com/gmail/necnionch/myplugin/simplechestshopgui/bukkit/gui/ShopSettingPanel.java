@@ -11,9 +11,13 @@ import org.bukkit.Material;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -75,7 +79,7 @@ public class ShopSettingPanel extends Panel {
 
         slots[9+1] = createItem();
         slots[9+3] = createAdminShopButton();
-        slots[9+4] = createOverrideOwnerButton();
+        slots[9+4] = createOverrideEditorButton();
         slots[9+5] = createImportPreviousButton();
         slots[9+7] = createCreateButton();
 
@@ -134,7 +138,7 @@ public class ShopSettingPanel extends Panel {
                 saveToSign();
                 this.update();
             }
-        });;
+        });
         slots[9*5+2] = createChangeSellPriceButton(1);
         slots[9*5+3] = createChangeSellPriceButton(5);
         slots[9*5+4] = createChangeSellPriceButton(10);
@@ -143,6 +147,23 @@ public class ShopSettingPanel extends Panel {
         slots[9*5+7] = createChangeSellPriceButton(1000);
 
         return slots;
+    }
+
+    @Override
+    public void onEvent(InventoryClickEvent event) {
+        if (!player.getInventory().equals(event.getClickedInventory()))
+            return;
+        if (event.getCurrentItem() == null)
+            return;
+
+        event.setCancelled(true);
+        event.setResult(Event.Result.DENY);
+        itemStack = event.getCurrentItem().clone();
+        setting.setAmount(itemStack.getAmount());
+        itemStack.setAmount(1);
+        setting.setItemId(null);
+        saveToSign();
+        this.update();
     }
 
     private PanelItem createAdminShopButton() {
@@ -167,11 +188,11 @@ public class ShopSettingPanel extends Panel {
         return null;
     }
 
-    private PanelItem createOverrideOwnerButton() {
+    private PanelItem createOverrideEditorButton() {
         // switch: override owner
         if (isAllowOverrideOwner() && !player.getUniqueId().equals(setting.getOwnerId())) {
-            List<String> lines = Lists.newArrayList(ChatColor.GRAY + "現在の作成者: " + ChatColor.WHITE + getOwnerName().orElse(setting.getOwnerId().toString()));
-            return PanelItem.createItem(Material.ANVIL, ChatColor.DARK_AQUA + "作成者を上書き", lines).setClickListener((e, p) -> {
+            List<String> lines = Lists.newArrayList(ChatColor.GRAY + "現在の編集者: " + ChatColor.WHITE + getOwnerName().orElse(setting.getOwnerId().toString()));
+            return PanelItem.createItem(Material.ANVIL, ChatColor.DARK_AQUA + "編集者を上書き", lines).setClickListener((e, p) -> {
                 if (ClickType.LEFT.equals(e.getClick())) {
                     setting.setOwnerId(player.getUniqueId());
                     saveToSign();
@@ -185,19 +206,11 @@ public class ShopSettingPanel extends Panel {
     private PanelItem createImportPreviousButton() {
         return getPreviousSetting().map(prev -> {
             String itemLabel = Optional.ofNullable(prev.getItemId())
-                    .map(itemId -> ChatColor.GOLD + itemId + ChatColor.WHITE + "[x" + prev.getAmount() + "]")
+                    .map(itemId -> ChatColor.GOLD + itemId + ChatColor.WHITE + " [x" + prev.getAmount() + "]")
                     .orElse("");
 
-            List<String> lines = Lists.newArrayList(ChatColor.YELLOW + "アイテム: " + itemLabel);
-
-            if (prev.getPriceBuy() != null) {
-                String line = ChatColor.GRAY + "売値: " + ChatColor.WHITE + prev.getPriceBuy();
-                lines.add(line);
-            }
-            if (prev.getPriceSell() != null) {
-                String line = ChatColor.GRAY + "買値: " + ChatColor.WHITE + prev.getPriceSell();
-                lines.add(line);
-            }
+            List<String> lines = createSettingPreview(prev, false, false, false);
+            lines.add(0, ChatColor.YELLOW + "アイテム: " + itemLabel);
 
             return PanelItem.createItem(Material.OAK_SIGN, ChatColor.GOLD + "前回の設定を読み込む", lines).setClickListener((e, p) -> {
                 if (ClickType.LEFT.equals(e.getClick())) {
@@ -226,21 +239,24 @@ public class ShopSettingPanel extends Panel {
     private PanelItem createCreateButton() {
         return  PanelItem.createItem(Material.AIR, "").setItemBuilder((p) -> {
             String name = ChatColor.DARK_RED + "アイテムが設定されていません";
-            if (setting.getItemId() != null && MaterialUtil.getItem(setting.getItemId()) != null) {
-                if (setting.getPriceBuy() == null || setting.getPriceBuy() < 0 || setting.getPriceSell() == null || setting.getPriceSell() < 0) {
+            List<String> lines = Collections.emptyList();
+
+            if ((setting.getItemId() != null && MaterialUtil.getItem(setting.getItemId()) != null) || itemStack != null) {
+                if ((setting.getPriceBuy() == null || setting.getPriceBuy() < 0) && (setting.getPriceSell() == null || setting.getPriceSell() < 0)) {
                     name = ChatColor.DARK_RED + "値段が設定されていません";
                 } else {
                     name = ChatColor.GOLD + "ショップを作成する！";
+                    lines = createSettingPreview(false, false, false);
                 }
             }
-            return PanelItem.createItem(Material.VILLAGER_SPAWN_EGG, name).getItemStack();
+            return PanelItem.createItem(Material.VILLAGER_SPAWN_EGG, name, lines).getItemStack();
 
         }).setClickListener((e, p) -> {
             if (ClickType.LEFT.equals(e.getClick())) {
-                if (setting.getItemId() != null && MaterialUtil.getItem(setting.getItemId()) != null) {
+                if ((setting.getItemId() != null && MaterialUtil.getItem(setting.getItemId()) != null) || itemStack != null) {
                     if ((setting.getPriceBuy() != null && setting.getPriceBuy() >= 0) || (setting.getPriceSell() != null && setting.getPriceSell() >= 0)) {
-                        setting.setPrevious();
-                        saveToSign();
+                        createChestShop();
+                        destroy(true);
                     }
                 }
             }
@@ -311,6 +327,10 @@ public class ShopSettingPanel extends Panel {
     }
 
     private List<String> createSettingPreview(boolean markAmount, boolean markBuy, boolean markSell) {
+        return createSettingPreview(setting, markAmount, markBuy, markSell);
+    }
+
+    private List<String> createSettingPreview(ShopSetting setting, boolean markAmount, boolean markBuy, boolean markSell) {
         int amount = setting.getAmount();
         List<String> lines = Lists.newArrayList(
                 ChatColor.GRAY + "個数: " + (markAmount ? ChatColor.WHITE.toString() + ChatColor.UNDERLINE : ChatColor.WHITE) + amount
@@ -344,5 +364,28 @@ public class ShopSettingPanel extends Panel {
         return lines;
     }
 
+
+    private void createChestShop() {
+        if (sign == null || !sign.isPlaced()) {
+            JavaPlugin.getPlugin(SChestShopGUIPlugin.class).getLogger().warning("No set placed sign");
+            return;
+        }
+
+        String itemId = setting.getItemId();
+        if (itemStack != null) {
+            itemId = MaterialUtil.getSignName(itemStack);
+        }
+        if (itemId == null) {
+            JavaPlugin.getPlugin(SChestShopGUIPlugin.class).getLogger().warning("No itemId");
+            return;
+        }
+
+        setting.setItemId(itemId);
+        setting.setPrevious();
+        if (!setting.createChestShop(player, sign)) {
+//            player.sendMessage(ChatColor.RED + "ショップを作成できませんでした");
+            sign.getBlock().breakNaturally();
+        }
+    }
 
 }
