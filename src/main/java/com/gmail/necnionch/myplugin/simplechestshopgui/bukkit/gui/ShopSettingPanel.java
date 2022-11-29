@@ -103,7 +103,9 @@ public class ShopSettingPanel extends Panel {
 
         }).setClickListener((e, p) -> {
             if (ClickType.LEFT.equals(e.getClick())) {
-                if (setting.getPriceBuy() == null || setting.getPriceBuy() < 0) {
+                if (setting.getPriceBuy() == null) {
+                    setting.setPriceBuy(Math.abs(Optional.ofNullable(setting.getPriceSell()).orElse(1)));
+                } else if (setting.getPriceBuy() < 0) {
                     setting.setPriceBuy(-Optional.ofNullable(setting.getPriceBuy()).orElse(-1));
                 } else {
                     setting.setPriceBuy(-Math.max(1, setting.getPriceBuy()));  // freeだったら1にする
@@ -130,7 +132,9 @@ public class ShopSettingPanel extends Panel {
 
         }).setClickListener((e, p) -> {
             if (ClickType.LEFT.equals(e.getClick())) {
-                if (setting.getPriceSell() == null || setting.getPriceSell() < 0) {
+                if (setting.getPriceSell() == null) {
+                    setting.setPriceSell(Math.abs(Optional.ofNullable(setting.getPriceBuy()).orElse(1)));
+                } else if (setting.getPriceSell() < 0) {
                     setting.setPriceSell(-Optional.ofNullable(setting.getPriceSell()).orElse(-1));
                 } else {
                     setting.setPriceSell(-Math.max(1, setting.getPriceSell()));  // freeだったら1にする
