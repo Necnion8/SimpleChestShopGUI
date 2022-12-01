@@ -162,7 +162,7 @@ public class ShopSetting {
         // format lines
         String[] lines = new String[4];
         lines[0] = (adminShop ? Properties.ADMIN_SHOP_NAME : shopOwner.getName());
-        lines[1] = "" + Math.min(1, amount);
+        lines[1] = "" + Math.max(1, amount);
 
         // price
         StringBuilder price = new StringBuilder();

@@ -280,7 +280,7 @@ public class ShopSettingPanel extends Panel {
             } else {
                 return;
             }
-            setting.setAmount(Math.max(0, setting.getAmount() + (value * mod)));
+            setting.setAmount(Math.max(1, setting.getAmount() + (value * mod)));
             saveToSign();
             this.update();
         });
