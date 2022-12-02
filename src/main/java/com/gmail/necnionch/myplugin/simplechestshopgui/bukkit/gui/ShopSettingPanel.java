@@ -269,7 +269,7 @@ public class ShopSettingPanel extends Panel {
 
     private PanelItem createChangeAmountButton(int value) {
         return PanelItem.createItem(
-                Material.WHITE_DYE, ChatColor.YELLOW + "個数を " + value + " 増やす",
+                Material.WHITE_DYE, ChatColor.YELLOW + "個数を " + formatValue(value) + "個 増やす",
                 createSettingPreview(true, false, false)
         ).setClickListener((e, p) -> {
             int mod;
@@ -291,7 +291,7 @@ public class ShopSettingPanel extends Panel {
             return null;
 
         return PanelItem.createItem(
-                Material.ORANGE_DYE, ChatColor.YELLOW + "売値を " + value + " 増やす",
+                Material.ORANGE_DYE, ChatColor.YELLOW + "売値を " + formatPrice(value) + " 増やす",
                 createSettingPreview(false, true, false)
         ).setClickListener((e, p) -> {
             int mod;
@@ -313,7 +313,7 @@ public class ShopSettingPanel extends Panel {
             return null;
 
         return PanelItem.createItem(
-                Material.GREEN_DYE, ChatColor.YELLOW + "買値を " + value + " 増やす",
+                Material.GREEN_DYE, ChatColor.YELLOW + "買値を " + formatPrice(value) + " 増やす",
                 createSettingPreview(false, false, true)
         ).setClickListener((e, p) -> {
             int mod;
@@ -337,17 +337,17 @@ public class ShopSettingPanel extends Panel {
     private List<String> createSettingPreview(ShopSetting setting, boolean markAmount, boolean markBuy, boolean markSell) {
         int amount = setting.getAmount();
         List<String> lines = Lists.newArrayList(
-                ChatColor.GRAY + "個数: " + (markAmount ? ChatColor.WHITE.toString() + ChatColor.UNDERLINE : ChatColor.WHITE) + amount
+                ChatColor.GRAY + "個数: " + (markAmount ? ChatColor.WHITE.toString() + ChatColor.UNDERLINE : ChatColor.WHITE) + formatValue(amount) + "個"
         );
         if (setting.getPriceBuy() != null && setting.getPriceBuy() >= 0) {
             StringBuilder sb = new StringBuilder(ChatColor.GRAY + "売値: " + ChatColor.WHITE + (markBuy ? ChatColor.UNDERLINE : ""));
             if (setting.getPriceBuy() == 0) {
                 sb.append("Free");
             } else {
-                sb.append(setting.getPriceBuy());
+                sb.append(formatPrice(setting.getPriceBuy()));
                 sb.append(ChatColor.GRAY);
                 sb.append("  (1個あたりの値段: 約");
-                sb.append(((Math.round((double) setting.getPriceBuy() / amount * 10) / 10d)));
+                sb.append(formatPrice((double) setting.getPriceBuy() / amount));
                 sb.append(")");
             }
             lines.add(sb.toString());
@@ -357,10 +357,10 @@ public class ShopSettingPanel extends Panel {
             if (setting.getPriceSell() == 0) {
                 sb.append("Free");
             } else {
-                sb.append(setting.getPriceSell());
+                sb.append(formatPrice(setting.getPriceSell()));
                 sb.append(ChatColor.GRAY);
                 sb.append("  (1個あたりの値段: 約");
-                sb.append(((Math.round((double) setting.getPriceSell() / amount * 10) / 10d)));
+                sb.append(formatPrice((double) setting.getPriceSell() / amount));
                 sb.append(")");
             }
             lines.add(sb.toString());
@@ -387,6 +387,15 @@ public class ShopSettingPanel extends Panel {
         setting.setItemId(itemId);
         setting.setPrevious();
         setting.createChestShop(player, sign);
+    }
+
+
+    private String formatValue(long num) {
+        return String.format("%,3d", num);
+    }
+
+    private String formatPrice(double num) {
+        return String.format("%,3.1f", Math.round(num * 10) / 10d).replaceAll("\\.0$", "");
     }
 
 }
