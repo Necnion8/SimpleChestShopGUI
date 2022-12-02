@@ -1,5 +1,6 @@
 package com.gmail.necnionch.myplugin.simplechestshopgui.bukkit;
 
+import com.gmail.necnionch.myplugin.simplechestshopgui.bukkit.commands.EditCommand;
 import com.gmail.necnionch.myplugin.simplechestshopgui.bukkit.gui.Panel;
 import com.gmail.necnionch.myplugin.simplechestshopgui.bukkit.gui.ShopSettingPanel;
 import com.gmail.necnionch.myplugin.simplechestshopgui.bukkit.shop.ShopSetting;
@@ -38,8 +39,8 @@ public final class SChestShopGUIPlugin extends JavaPlugin implements Listener {
     public void onEnable() {
         Panel.OWNER = this;
         getServer().getPluginManager().registerEvents(this, this);
+        registerCommands();
         registerEconomy();
-
     }
 
     @Override
@@ -47,6 +48,11 @@ public final class SChestShopGUIPlugin extends JavaPlugin implements Listener {
         if (economyFormatter != null)
             priceFormatters.remove(economyFormatter);
         Panel.destroyAll();
+    }
+
+    public void registerCommands() {
+        Optional.ofNullable(getCommand("editshop"))
+                .ifPresent(cmd -> cmd.setExecutor(new EditCommand(this)));
     }
 
     public void registerEconomy() {

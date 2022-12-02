@@ -10,8 +10,16 @@ description: |-
   ChestShopの作成を簡単にするシンプルなGUIプラグイン
   まずは看板に new shop と書いてみよう
 
+commands:
+  editshop:
+    aliases: [shopedit]
+    permission: simplechestshopgui.command.editshop
+
 permissions:
   simplechestshopgui.use:
+    default: true
+
+  simplechestshopgui.command.editshop:
     default: true
 
   simplechestshopgui.access-other:
