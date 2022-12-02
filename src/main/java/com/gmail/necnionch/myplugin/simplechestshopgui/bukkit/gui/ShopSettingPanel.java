@@ -395,7 +395,7 @@ public class ShopSettingPanel extends Panel {
     }
 
     private String formatPrice(double num) {
-        return String.format("%,3.1f", Math.round(num * 10) / 10d).replaceAll("\\.0$", "");
+        return SChestShopGUIPlugin.formatPrice(num);
     }
 
 }

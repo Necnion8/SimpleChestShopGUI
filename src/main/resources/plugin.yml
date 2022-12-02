@@ -3,6 +3,7 @@ version: '${version}'
 main: com.gmail.necnionch.myplugin.simplechestshopgui.bukkit.SChestShopGUIPlugin
 api-version: 1.14
 depend: [ ChestShop ]
+softdepend: [ Vault ]
 authors: [ Necnion8 ]
 
 description: |-
