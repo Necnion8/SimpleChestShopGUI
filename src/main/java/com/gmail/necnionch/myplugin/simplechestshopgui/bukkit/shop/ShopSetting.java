@@ -1,6 +1,8 @@
 package com.gmail.necnionch.myplugin.simplechestshopgui.bukkit.shop;
 
+import com.Acrobot.Breeze.Utils.PriceUtil;
 import com.Acrobot.ChestShop.Configuration.Properties;
+import com.Acrobot.ChestShop.Signs.ChestShopSign;
 import com.gmail.necnionch.myplugin.simplechestshopgui.bukkit.SChestShopGUIPlugin;
 import com.gmail.necnionch.myplugin.simplechestshopgui.bukkit.util.ShopUtil;
 import com.google.common.collect.Maps;
@@ -14,6 +16,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -153,6 +156,24 @@ public class ShopSetting {
         boolean adminShop = data.getOrDefault(new NamespacedKey(plugin, "admin"), PersistentDataType.INTEGER, 0) >= 1;
 
         return new ShopSetting(owner, itemId, amount, priceBuy, priceSell, adminShop);
+    }
+
+    public static ShopSetting createFromChestShop(Sign sign, UUID owner) throws IllegalArgumentException {
+        if (!ChestShopSign.isValid(sign))
+            throw new IllegalArgumentException("Invalid ChestShop sign");
+
+        String name = ShopUtil.getOwner(sign);
+        int amount = ShopUtil.getQuantity(sign);
+        String priceLine = ShopUtil.getPrice(sign);
+        String item = ShopUtil.getItem(sign);
+
+        BigDecimal buy = PriceUtil.getExactBuyPrice(priceLine);
+        BigDecimal sell = PriceUtil.getExactSellPrice(priceLine);
+
+        Integer buyValue = (PriceUtil.NO_PRICE.equals(buy)) ? null : buy.intValue();
+        Integer sellValue = (PriceUtil.NO_PRICE.equals(sell)) ? null : sell.intValue();
+
+        return new ShopSetting(owner, item, amount, buyValue, sellValue, ChestShopSign.isAdminShop(name));
     }
 
     public boolean createChestShop(Player shopOwner, Sign sign) {
