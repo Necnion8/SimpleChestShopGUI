@@ -2,8 +2,10 @@ package com.gmail.necnionch.myplugin.simplechestshopgui.bukkit.gui;
 
 import com.Acrobot.Breeze.Utils.MaterialUtil;
 import com.Acrobot.ChestShop.Permission;
+import com.Acrobot.ChestShop.Signs.ChestShopSign;
 import com.gmail.necnionch.myplugin.simplechestshopgui.bukkit.SChestShopGUIPlugin;
 import com.gmail.necnionch.myplugin.simplechestshopgui.bukkit.shop.ShopSetting;
+import com.gmail.necnionch.myplugin.simplechestshopgui.bukkit.util.ShopUtil;
 import com.google.common.collect.Lists;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
@@ -25,18 +27,22 @@ public class ShopSettingPanel extends Panel {
 
     private final ShopSetting setting;
     private final Player player;
-    private Sign sign;
+    private final Sign sign;
     private ItemStack itemStack;
 
-    public ShopSettingPanel(Player player, ShopSetting setting) {
+    public ShopSettingPanel(Player player, ShopSetting setting, Sign sign) {
         super(player, 54, ChatColor.DARK_AQUA + "ショップ編集", new ItemStack(Material.AIR));
         this.setting = setting;
         this.player = player;
+        this.sign = sign;
     }
 
-    public ShopSettingPanel withSign(Sign sign) {
-        this.sign = sign;
-        return this;
+    public static ShopSettingPanel newSign(Player player, ShopSetting setting, Sign sign) {
+        return new ShopSettingPanel(player, setting, sign);
+    }
+
+    private boolean isCreatedShop() {
+        return ChestShopSign.isValid(sign);
     }
 
     private boolean isAllowAdminShop() {
@@ -57,7 +63,7 @@ public class ShopSettingPanel extends Panel {
     }
 
     private void saveToSign() {
-        if (sign != null) {
+        if (sign != null && !isCreatedShop()) {
             sign.setLine(0, ChatColor.DARK_RED + "[ChestShop GUI]");
             sign.setLine(1, getOwnerName().orElse("?"));
             sign.setLine(2, "");
@@ -171,7 +177,7 @@ public class ShopSettingPanel extends Panel {
     }
 
     private PanelItem createAdminShopButton() {
-        if (isAllowAdminShop()) {
+        if (isAllowAdminShop() && !isCreatedShop()) {
             return PanelItem.createItem(Material.AIR, "").setItemBuilder((p) -> {
                 String name;
                 if (setting.isAdminShop()) {
@@ -249,7 +255,7 @@ public class ShopSettingPanel extends Panel {
                 if ((setting.getPriceBuy() == null || setting.getPriceBuy() < 0) && (setting.getPriceSell() == null || setting.getPriceSell() < 0)) {
                     name = ChatColor.DARK_RED + "値段が設定されていません";
                 } else {
-                    name = ChatColor.GOLD + "ショップを作成する！";
+                    name = ChatColor.GOLD + (isCreatedShop() ? "ショップを更新する！" : "ショップを作成する！");
                     lines = createSettingPreview(false, false, false);
                 }
             }
@@ -384,9 +390,15 @@ public class ShopSettingPanel extends Panel {
             return;
         }
 
-        setting.setItemId(itemId);
-        setting.setPrevious();
-        setting.createChestShop(player, sign);
+        if (isCreatedShop()) {
+            sign.setLine(2, ShopUtil.formatPrice(setting.getPriceBuy(), setting.getPriceSell()));
+            sign.setLine(3, itemId);
+            sign.update(false);
+        } else {
+            setting.setItemId(itemId);
+            setting.setPrevious();
+            setting.createChestShop(player, sign);
+        }
     }
 
 

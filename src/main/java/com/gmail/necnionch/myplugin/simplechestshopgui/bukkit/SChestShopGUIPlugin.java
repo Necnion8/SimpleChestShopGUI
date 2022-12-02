@@ -98,9 +98,7 @@ public final class SChestShopGUIPlugin extends JavaPlugin implements Listener {
                 ShopSetting draft = ShopSetting.createEmpty(event.getPlayer().getUniqueId());
                 Sign sign = (Sign) event.getBlock().getState();
 
-                new ShopSettingPanel(event.getPlayer(), draft)
-                        .withSign(sign)
-                        .open();
+                ShopSettingPanel.newSign(event.getPlayer(), draft, sign).open();
                 return;
             }
         }
@@ -136,10 +134,7 @@ public final class SChestShopGUIPlugin extends JavaPlugin implements Listener {
                 return;
             }
         }
-        new ShopSettingPanel(event.getPlayer(), setting)
-                .withSign(sign)
-                .open();
-
+        ShopSettingPanel.newSign(event.getPlayer(), setting, sign).open();
     }
 
 

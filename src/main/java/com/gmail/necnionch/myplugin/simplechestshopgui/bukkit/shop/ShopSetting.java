@@ -1,8 +1,8 @@
 package com.gmail.necnionch.myplugin.simplechestshopgui.bukkit.shop;
 
-import com.Acrobot.Breeze.Utils.PriceUtil;
 import com.Acrobot.ChestShop.Configuration.Properties;
 import com.gmail.necnionch.myplugin.simplechestshopgui.bukkit.SChestShopGUIPlugin;
+import com.gmail.necnionch.myplugin.simplechestshopgui.bukkit.util.ShopUtil;
 import com.google.common.collect.Maps;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -161,24 +161,9 @@ public class ShopSetting {
 
         // format lines
         String[] lines = new String[4];
-        lines[0] = (adminShop ? Properties.ADMIN_SHOP_NAME : shopOwner.getName());
-        lines[1] = "" + Math.max(1, amount);
-
-        // price
-        StringBuilder price = new StringBuilder();
-        Integer sellValue = priceSell == null || priceSell < 0 ? null : priceSell;
-        Integer buyValue = priceBuy == null || priceBuy < 0 ? null : priceBuy;
-
-        if (buyValue != null) {
-            price.append("B ").append(formatPriceText(buyValue));
-            if (sellValue != null) {
-                price.append(" : ").append(formatPriceText(sellValue)).append(" S");
-            }
-        } else if (sellValue != null) {
-            price.append("S ").append(formatPriceText(sellValue));
-        }
-
-        lines[2] = price.toString();
+        lines[0] = ShopUtil.formatOwner(adminShop ? Properties.ADMIN_SHOP_NAME : shopOwner.getName());
+        lines[1] = ShopUtil.formatAmount(Math.max(1, amount));
+        lines[2] = ShopUtil.formatPrice(priceBuy, priceSell);
         lines[3] = itemId;
 
         // clear setting
@@ -210,15 +195,6 @@ public class ShopSetting {
         return true;
     }
 
-    private static String formatPriceText(Integer price) {
-        if (price == 0)
-            return PriceUtil.FREE_TEXT;
-
-        String tmp = String.valueOf(Math.round(price * 100) / 100d);
-        if (tmp.endsWith(".0"))
-            tmp = tmp.substring(0, tmp.length() - 2);
-        return tmp;
-    }
 
 
     public static Map<UUID, ShopSetting> getPlayerPrevious() {
