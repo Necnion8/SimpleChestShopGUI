@@ -86,11 +86,11 @@ public class ShopSettingPanel extends Panel {
         List<String> lines = createSettingPreview(false, false, false);
         slots[9*3+1] = PanelItem.createItem(Material.WHITE_WOOL, lines.remove(0), lines);
         slots[9*3+2] = createChangeAmountButton(1);
-        slots[9*3+3] = createChangeAmountButton(5);
-        slots[9*3+4] = createChangeAmountButton(10);
-        slots[9*3+5] = createChangeAmountButton(50);
-        slots[9*3+6] = createChangeAmountButton(100);
-        slots[9*3+7] = createChangeAmountButton(1000);
+        slots[9*3+3] = createChangeAmountButton(10);
+        slots[9*3+4] = createChangeAmountButton(50);
+        slots[9*3+5] = createChangeAmountButton(100);
+        slots[9*3+6] = createChangeAmountButton(1000);
+        slots[9*3+7] = createChangeAmountButton(10000);
 
         slots[9*4+1] = PanelItem.createItem(Material.AIR, "", Lists.newArrayList(ChatColor.GRAY + "クリックで切り替え")).setItemBuilder((p) -> {
             String name = ChatColor.GOLD + "アイテム販売: ";
@@ -115,11 +115,11 @@ public class ShopSettingPanel extends Panel {
             }
         });
         slots[9*4+2] = createChangeBuyPriceButton(1);
-        slots[9*4+3] = createChangeBuyPriceButton(5);
-        slots[9*4+4] = createChangeBuyPriceButton(10);
-        slots[9*4+5] = createChangeBuyPriceButton(50);
-        slots[9*4+6] = createChangeBuyPriceButton(100);
-        slots[9*4+7] = createChangeBuyPriceButton(1000);
+        slots[9*4+3] = createChangeBuyPriceButton(10);
+        slots[9*4+4] = createChangeBuyPriceButton(50);
+        slots[9*4+5] = createChangeBuyPriceButton(100);
+        slots[9*4+6] = createChangeBuyPriceButton(1000);
+        slots[9*4+7] = createChangeBuyPriceButton(10000);
 
         slots[9*5+1] = PanelItem.createItem(Material.AIR, "", Lists.newArrayList(ChatColor.GRAY + "クリックで切り替え")).setItemBuilder((p) -> {
             String name = ChatColor.GOLD + "アイテム買取: ";
@@ -144,11 +144,11 @@ public class ShopSettingPanel extends Panel {
             }
         });
         slots[9*5+2] = createChangeSellPriceButton(1);
-        slots[9*5+3] = createChangeSellPriceButton(5);
-        slots[9*5+4] = createChangeSellPriceButton(10);
-        slots[9*5+5] = createChangeSellPriceButton(50);
-        slots[9*5+6] = createChangeSellPriceButton(100);
-        slots[9*5+7] = createChangeSellPriceButton(1000);
+        slots[9*5+3] = createChangeSellPriceButton(10);
+        slots[9*5+4] = createChangeSellPriceButton(50);
+        slots[9*5+5] = createChangeSellPriceButton(100);
+        slots[9*5+6] = createChangeSellPriceButton(1000);
+        slots[9*5+7] = createChangeSellPriceButton(10000);
 
         return slots;
     }
