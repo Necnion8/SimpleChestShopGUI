@@ -403,7 +403,7 @@ public class ShopSettingPanel extends Panel {
 
 
     private String formatValue(long num) {
-        return String.format("%,3d", num);
+        return String.format("%,d", num);
     }
 
     private String formatPrice(double num) {
