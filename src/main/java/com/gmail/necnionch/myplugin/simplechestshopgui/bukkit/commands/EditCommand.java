@@ -84,7 +84,7 @@ public class EditCommand implements TabExecutor {
             this.player = player;
         }
 
-        @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+        @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
         public void onInteract(PlayerInteractEvent event) {
             if (!event.getPlayer().equals(player) || !EquipmentSlot.HAND.equals(event.getHand()) || event.getClickedBlock() == null)
                 return;
