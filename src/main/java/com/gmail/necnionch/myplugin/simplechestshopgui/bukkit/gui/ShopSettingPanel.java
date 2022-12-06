@@ -391,6 +391,7 @@ public class ShopSettingPanel extends Panel {
         }
 
         if (isCreatedShop()) {
+            sign.setLine(1, "" + setting.getAmount());
             sign.setLine(2, ShopUtil.formatPrice(setting.getPriceBuy(), setting.getPriceSell()));
             sign.setLine(3, itemId);
             sign.update(false);
