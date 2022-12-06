@@ -44,7 +44,10 @@ public class EditCommand implements TabExecutor {
 
         if (block.getState() instanceof Sign) {
             Sign sign = (Sign) block.getState();
-            if (ChestShopSign.isValid(sign) && ChestShopSign.canAccess(player, sign)) {
+            if (tryEditingSign(player, sign)) {
+                lookups.remove(player);
+                return true;
+            } else if (ChestShopSign.isValid(sign) && ChestShopSign.canAccess(player, sign)) {
                 lookups.remove(player);
                 tryEditSign(player, sign);
                 return true;
@@ -66,6 +69,24 @@ public class EditCommand implements TabExecutor {
         } else {
             ShopSettingPanel.newSign(player, ShopSetting.createFromChestShop(sign, player.getUniqueId()), sign).open();
         }
+    }
+
+    private boolean tryEditingSign(Player player, Sign sign) {
+        if (!player.hasPermission(SChestShopGUIPlugin.USE_PERM))
+            return false;
+
+        ShopSetting setting;
+        try {
+            setting = ShopSetting.createFromSign(sign);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+
+        if (player.getUniqueId().equals(setting.getOwnerId()) || player.hasPermission(SChestShopGUIPlugin.OTHER_ACCESS_PERM)) {
+            ShopSettingPanel.newSign(player, setting, sign).open();
+            return true;
+        }
+        return false;
     }
 
     @NotNull
@@ -94,7 +115,9 @@ public class EditCommand implements TabExecutor {
             event.setCancelled(true);
             cancel();
             Sign sign = (Sign) event.getClickedBlock().getState();
-            tryEditSign(player, sign);
+
+            if (!tryEditingSign(player, sign))
+                tryEditSign(player, sign);
         }
 
         @EventHandler
@@ -119,7 +142,6 @@ public class EditCommand implements TabExecutor {
             lookups.put(player, this);
             plugin.getServer().getPluginManager().registerEvents(this, plugin);
         }
-
 
     }
 
